@@ -1,4 +1,4 @@
-# 🧠 Rekrutacja do sekcji AI KN Neuron | Wiosna 2026
+# ADHD Classifier — EEG-based Binary Classification
 
 
 ## 🚀 Proces Rekrutacji
