@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.signal import welch
 from scipy.stats import skew, kurtosis
 
-from .data_loader import EEG_CHANNELS, SAMPLING_FREQ
+from data_loader import EEG_CHANNELS, SAMPLING_FREQ
 
 
 FREQ_BANDS = {
@@ -16,7 +16,7 @@ FREQ_BANDS = {
 
 def band_power(psd: np.ndarray, freqs: np.ndarray, low: float, high: float) -> float:
     mask = (freqs >= low) & (freqs < high)
-    return float(np.trapz(psd[mask], freqs[mask]))
+    return float(np.trapezoid(psd[mask], freqs[mask]))
 
 
 def extract_features_from_window(window: np.ndarray) -> np.ndarray:
@@ -44,6 +44,14 @@ def extract_features_from_window(window: np.ndarray) -> np.ndarray:
             float(kurtosis(signal)),
         ])
 
+    theta_sum, alpha_sum = 0.0, 0.0
+    for ch_idx in range(window.shape[1]):
+        signal = window[:, ch_idx]
+        freqs, psd = welch(signal, fs=SAMPLING_FREQ, nperseg=min(n_samples, SAMPLING_FREQ * 2))
+        theta_sum += band_power(psd, freqs, *FREQ_BANDS['theta'])
+        alpha_sum += band_power(psd, freqs, *FREQ_BANDS['alpha'])
+    features.append(theta_sum / (alpha_sum + 1e-12))
+
     return np.array(features, dtype=np.float32)
 
 
@@ -55,6 +63,7 @@ def build_feature_names() -> list[str]:
         for band in FREQ_BANDS:
             names.append(f"{ch}_{band}_rel")
         names.extend([f"{ch}_mean", f"{ch}_std", f"{ch}_skew", f"{ch}_kurtosis"])
+    names.append('theta_alpha_ratio')
     return names
 
 
