@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import RobustScaler
 
-from .data_loader import EEG_CHANNELS
+from data_loader import EEG_CHANNELS
 
 
 def drop_missing(df: pd.DataFrame) -> pd.DataFrame:
