@@ -6,8 +6,6 @@
     <strong>Binary classification of ADHD vs Control using 19-channel EEG spectral features</strong>
 </p>
 
-## Tech Stack
-
 <div align="center">
 
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python)](https://www.python.org/) [![NumPy](https://img.shields.io/badge/NumPy-2.4+-013243?logo=numpy)](https://numpy.org/) [![Pandas](https://img.shields.io/badge/Pandas-3.0+-150458?logo=pandas)](https://pandas.pydata.org/)
@@ -43,10 +41,10 @@ Download `adhdata.csv` from Kaggle and place it at `data/adhdata.csv`.
 
 Run in order:
 
-| Notebook                      | Description                                                   |
-| ----------------------------- | ------------------------------------------------------------- |
-| `notebooks/eda.ipynb`         | Signal quality, band powers, class distributions              |
-| `notebooks/experiments.ipynb` | Full pipeline: preprocessing → features → models → comparison |
+| Notebook                      | Description                                      |
+| ----------------------------- | ------------------------------------------------ |
+| `notebooks/eda.ipynb`         | signal quality, band powers, class distributions |
+| `notebooks/experiments.ipynb` | preprocessing → features → models → comparison   |
 
 ## Results
 
