@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import (
@@ -53,11 +54,34 @@ def plot_roc_curve(y_true: np.ndarray, y_proba: np.ndarray, label: str = '') -> 
     plt.show()
 
 
+def aggregate_by_subject(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    groups: np.ndarray,
+    y_proba: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+    unique_subjects = np.unique(groups)
+    agg_true, agg_pred = [], []
+    agg_proba: list[float] | None = [] if y_proba is not None else None
+
+    for subj in unique_subjects:
+        mask = groups == subj
+        agg_true.append(int(round(float(y_true[mask].mean()))))
+        agg_pred.append(int(round(float(y_pred[mask].mean()))))
+        if agg_proba is not None and y_proba is not None:
+            agg_proba.append(float(y_proba[mask].mean()))
+
+    return (
+        np.array(agg_true),
+        np.array(agg_pred),
+        np.array(agg_proba) if agg_proba is not None else None,
+    )
+
+
 def compare_models(results: dict[str, dict]) -> None:
     df_results = {name: metrics for name, metrics in results.items()}
-    import pandas as pd
     df = pd.DataFrame(df_results).T
-    print("\nModel Comparison:")
+    print("\nmodel comparison:")
     print(df.round(4).to_string())
 
     metric_cols = [c for c in df.columns if c in ['accuracy', 'f1_adhd', 'roc_auc']]

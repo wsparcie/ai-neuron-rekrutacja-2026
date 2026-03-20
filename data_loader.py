@@ -20,7 +20,7 @@ SAMPLING_FREQ = 128
 def load_data(csv_path: str | Path) -> pd.DataFrame:
     csv_path = Path(csv_path)
     if not csv_path.exists():
-        raise FileNotFoundError(f"Dataset not found at: {csv_path}")
+        raise FileNotFoundError(f"dataset not found at: {csv_path}")
 
     df = pd.read_csv(csv_path)
 
@@ -33,7 +33,7 @@ def load_data(csv_path: str | Path) -> pd.DataFrame:
 
     n_subjects = df['ID'].nunique()
     n_adhd = df.groupby('ID')['label'].first().sum()
-    print(f"Loaded {len(df):,} samples | {n_subjects} subjects ({n_adhd} ADHD, {n_subjects - n_adhd} Control)")
+    print(f"loaded {len(df):,} samples | {n_subjects} subjects ({n_adhd} ADHD, {n_subjects - n_adhd} Control)")
 
     return df
 
@@ -54,27 +54,12 @@ def subject_split(
     train_df = df[df['ID'].isin(train_ids)].reset_index(drop=True)
     test_df = df[df['ID'].isin(test_ids)].reset_index(drop=True)
 
-    _print_split_info(subject_labels, train_ids, test_ids)
+    tr_labels = subject_labels[subject_labels['ID'].isin(train_ids)]['label']
+    te_labels = subject_labels[subject_labels['ID'].isin(test_ids)]['label']
+    print(f"train: {len(train_ids)} subjects ({tr_labels.sum()} ADHD, {(~tr_labels.astype(bool)).sum()} Control)")
+    print(f"test:  {len(test_ids)} subjects ({te_labels.sum()} ADHD, {(~te_labels.astype(bool)).sum()} Control)")
 
     return train_df, test_df
-
-
-def _print_split_info(
-    subject_labels: pd.DataFrame,
-    train_ids: set,
-    test_ids: set,
-) -> None:
-    train_labels = subject_labels[subject_labels['ID'].isin(train_ids)]['label']
-    test_labels = subject_labels[subject_labels['ID'].isin(test_ids)]['label']
-
-    print(
-        f"Train: {len(train_ids)} subjects "
-        f"({train_labels.sum()} ADHD, {(~train_labels.astype(bool)).sum()} Control)"
-    )
-    print(
-        f"Test:  {len(test_ids)} subjects "
-        f"({test_labels.sum()} ADHD, {(~test_labels.astype(bool)).sum()} Control)"
-    )
 
 
 def get_subject_windows(
@@ -101,5 +86,5 @@ def get_subject_windows(
     y = np.array(y_list)
     groups = np.array(groups_list)
 
-    print(f"Created {len(X)} windows of size {window_size} (step={step})")
+    print(f"created {len(X)} windows of size {window_size} with step {step}")
     return X, y, groups

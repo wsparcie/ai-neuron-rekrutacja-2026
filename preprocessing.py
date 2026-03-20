@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import RobustScaler
 
-from data_loader import EEG_CHANNELS
+from .data_loader import EEG_CHANNELS
 
 
 def drop_missing(df: pd.DataFrame) -> pd.DataFrame:
@@ -10,7 +10,7 @@ def drop_missing(df: pd.DataFrame) -> pd.DataFrame:
     df = df.dropna(subset=EEG_CHANNELS)
     dropped = before - len(df)
     if dropped:
-        print(f"Dropped {dropped} rows with NaN values")
+        print(f"dropped {dropped} rows with NaN values")
     return df.reset_index(drop=True)
 
 
@@ -28,9 +28,18 @@ def scale_channels(
     return train_df, test_df
 
 
-def clip_artefacts(df: pd.DataFrame, threshold: float = 5.0) -> pd.DataFrame:
-    df = df.copy()
+def clip_artefacts(
+    train_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    threshold: float = 5.0,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    train_df = train_df.copy()
+    test_df = test_df.copy()
     for ch in EEG_CHANNELS:
-        mean, std = df[ch].mean(), df[ch].std()
-        df[ch] = df[ch].clip(lower=mean - threshold * std, upper=mean + threshold * std)
-    return df
+        median = train_df[ch].median()
+        mad = (train_df[ch] - median).abs().median()
+        lo = median - threshold * mad
+        hi = median + threshold * mad
+        train_df[ch] = train_df[ch].clip(lower=lo, upper=hi)
+        test_df[ch] = test_df[ch].clip(lower=lo, upper=hi)
+    return train_df, test_df

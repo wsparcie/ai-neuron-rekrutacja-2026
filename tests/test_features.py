@@ -1,11 +1,11 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import numpy as np
-from data_loader import EEG_CHANNELS
-from feature_extraction import (
+from adhd_classifier.data_loader import EEG_CHANNELS
+from adhd_classifier.feature_extraction import (
     band_power,
     extract_features_from_window,
     extract_window_features,
@@ -95,6 +95,83 @@ def test_features_vary_across_windows():
     print("features vary across different windows")
 
 
+# -------------------
+# Data loader tests
+# -------------------
+
+def test_load_data_missing_file():
+    import tempfile, pathlib
+    from adhd_classifier.data_loader import load_data
+    nonexistent = pathlib.Path(tempfile.gettempdir()) / "does_not_exist_adhd.csv"
+    try:
+        load_data(nonexistent)
+        assert False, "should have raised FileNotFoundError"
+    except FileNotFoundError:
+        pass
+    print("load_data raises FileNotFoundError for missing file")
+
+
+def test_subject_split_no_leakage():
+    import pandas as pd
+    from adhd_classifier.data_loader import subject_split, EEG_CHANNELS
+
+    rng = np.random.default_rng(42)
+    n_subjects = 20
+    rows = []
+    for i in range(n_subjects):
+        label = "ADHD" if i < 10 else "Control"
+        for _ in range(50):
+            row = {ch: rng.standard_normal() for ch in EEG_CHANNELS}
+            row['ID'] = str(i)
+            row['Class'] = label
+            rows.append(row)
+    df = pd.DataFrame(rows)
+    df['label'] = (df['Class'] == 'ADHD').astype(int)
+
+    train_df, test_df = subject_split(df, test_size=0.2, random_state=0)
+    train_ids = set(train_df['ID'].unique())
+    test_ids  = set(test_df['ID'].unique())
+
+    overlap = train_ids & test_ids
+    assert len(overlap) == 0, f"subject leakage: {overlap}"
+    print(f"subject split OK — {len(train_ids)} train / {len(test_ids)} test, zero overlap")
+
+
+# ------------------
+# Neural net tests
+# ------------------
+
+def test_mlp_forward_pass():
+    import torch
+    from adhd_classifier.neural_net import ADHDNet
+
+    input_dim = len(build_feature_names())
+    model = ADHDNet(input_dim=input_dim, hidden_dims=[64, 32], dropout=0.0)
+    model.eval()
+
+    x = torch.randn(8, input_dim)
+    with torch.no_grad():
+        out = model(x)
+
+    assert out.shape == (8,), f"expected (8,), got {out.shape}"
+    print(f"ADHDNet forward pass OK — output shape: {out.shape}")
+
+
+def test_cnn_forward_pass():
+    import torch
+    from adhd_classifier.neural_net import EEGConvNet
+
+    model = EEGConvNet(n_channels=N_CHANNELS, dropout=0.0)
+    model.eval()
+
+    x = torch.randn(4, N_CHANNELS, WINDOW_SIZE)
+    with torch.no_grad():
+        out = model(x)
+
+    assert out.shape == (4,), f"expected (4,), got {out.shape}"
+    print(f"EEGConvNet forward pass OK — output shape: {out.shape}")
+
+
 if __name__ == "__main__":
     print(f"running feature extraction tests  ({N_CHANNELS} channels, window={WINDOW_SIZE})\n")
 
@@ -106,6 +183,10 @@ if __name__ == "__main__":
         test_theta_alpha_ratio_in_names,
         test_batch_extraction_shape,
         test_features_vary_across_windows,
+        test_load_data_missing_file,
+        test_subject_split_no_leakage,
+        test_mlp_forward_pass,
+        test_cnn_forward_pass,
     ]
 
     passed = 0
