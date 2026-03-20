@@ -20,7 +20,11 @@
 
 ---
 
-Dataset: [EEG Dataset for ADHD](https://www.kaggle.com/datasets/danizo/eeg-dataset-for-adhd/data) — 121 subjects (61 ADHD, 60 Control), 128 Hz, 19 channels.
+#### Dataset: [EEG Dataset for ADHD](https://www.kaggle.com/datasets/danizo/eeg-dataset-for-adhd/data)
+
+121 subjects (61 ADHD, 60 Control)
+128 Hz
+19 channels
 
 ## Setup
 
@@ -39,27 +43,25 @@ Download `adhdata.csv` from Kaggle and place it at `data/adhdata.csv`.
 
 ## Notebooks
 
-Run in order:
-
-| Notebook                      | Description                                      |
+| notebook                      | description                                      |
 | ----------------------------- | ------------------------------------------------ |
 | `notebooks/eda.ipynb`         | signal quality, band powers, class distributions |
 | `notebooks/experiments.ipynb` | preprocessing → features → models → comparison   |
 
 ## Results
 
-5-fold GroupKFold CV (96 train subjects):
+5-fold GroupKFold CV:
 
-| Model             | Accuracy      | F1            | ROC AUC       |
+| model             | accuracy      | f1            | roc auc       |
 | ----------------- | ------------- | ------------- | ------------- |
 | SVM (RBF)         | 0.655 ± 0.095 | 0.678 ± 0.103 | 0.747 ± 0.115 |
 | Random Forest     | 0.696 ± 0.110 | 0.695 ± 0.144 | 0.738 ± 0.061 |
 | Gradient Boosting | 0.696 ± 0.114 | 0.691 ± 0.142 | 0.723 ± 0.066 |
 | LDA               | 0.573 ± 0.089 | 0.564 ± 0.130 | 0.534 ± 0.143 |
 
-Hold-out test set (25 subjects):
+Hold-out test set:
 
-| Model                              | Accuracy | F1 (ADHD) | ROC AUC   |
+| model                              | accuracy | f1 (ADHD) | roc auc   |
 | ---------------------------------- | -------- | --------- | --------- |
 | SVM (RBF)                          | 0.68     | 0.667     | 0.596     |
 | Random Forest                      | 0.68     | 0.667     | 0.644     |
@@ -73,10 +75,10 @@ Hold-out test set (25 subjects):
 
 229 features per subject, extracted via Welch PSD over 19 channels:
 
-- absolute band power (δ, θ, α, β) — 76 features
-- relative band power — 76 features
-- per-channel stats (mean, std, skew, kurtosis) — 76 features
-- theta/alpha ratio (TAR) — 1 feature
+- absolute band power (δ, θ, α, β): 76 features
+- relative band power: 76 features
+- per-channel stats (mean, std, skew, kurtosis): 76 features
+- theta/alpha ratio (TAR): 1 feature
 
 ## Structure
 
