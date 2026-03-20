@@ -1,0 +1,28 @@
+# Virtual environment
+venv/
+
+# Data (large files - download via kaggle)
+DATA/
+*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Models / results
+*.pkl
+*.pth
+*.h5
+results/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
