@@ -46,7 +46,7 @@ def train_baselines(
         y_proba = model.predict_proba(X_test)[:, 1] if hasattr(model, 'predict_proba') else None
 
         results[name] = {'model': model, 'y_pred': y_pred, 'y_proba': y_proba}
-        print(f"Trained: {name}")
+        print(f"trained: {name}")
 
     return results
 
@@ -75,7 +75,7 @@ def cross_validate_classifiers(
             if y_proba is not None:
                 cv_results[name]['roc_auc'].append(roc_auc_score(y_val, y_proba))
 
-        print(f"Fold {fold}/{n_splits} done")
+        print(f"folded: {fold}/{n_splits}")
 
     summary = {}
     for name, scores in cv_results.items():
