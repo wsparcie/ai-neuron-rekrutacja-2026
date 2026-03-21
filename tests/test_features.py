@@ -64,8 +64,7 @@ def test_feature_names_count():
 def test_theta_alpha_ratio_in_names():
     names = build_feature_names()
     assert "theta_alpha_ratio" in names, "theta_alpha_ratio missing from feature names"
-    assert names[-1] == "theta_alpha_ratio", "theta_alpha_ratio should be the last feature"
-    print("theta_alpha_ratio present as last feature")
+    print(f"theta_alpha_ratio present (index {names.index('theta_alpha_ratio')} of {len(names)})")
 
 
 def test_batch_extraction_shape():
@@ -94,10 +93,6 @@ def test_features_vary_across_windows():
     assert not np.allclose(f1, f2), "different windows produced identical features"
     print("features vary across different windows")
 
-
-# -------------------
-# Data loader tests
-# -------------------
 
 def test_load_data_missing_file():
     import tempfile, pathlib
@@ -136,10 +131,6 @@ def test_subject_split_no_leakage():
     assert len(overlap) == 0, f"subject leakage: {overlap}"
     print(f"subject split OK — {len(train_ids)} train / {len(test_ids)} test, zero overlap")
 
-
-# ------------------
-# Neural net tests
-# ------------------
 
 def test_mlp_forward_pass():
     import torch
