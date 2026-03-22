@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import train_test_split
 
 
 EEG_CHANNELS = [
@@ -31,10 +31,6 @@ def load_data(csv_path: str | Path) -> pd.DataFrame:
     df['label'] = (df['Class'].str.strip() == 'ADHD').astype(int)
     df['ID'] = df['ID'].astype(str).str.strip()
 
-    n_subjects = df['ID'].nunique()
-    n_adhd = df.groupby('ID')['label'].first().sum()
-    print(f"loaded {len(df):,} samples | {n_subjects} subjects ({n_adhd} ADHD, {n_subjects - n_adhd} Control)")
-
     return df
 
 
@@ -45,19 +41,18 @@ def subject_split(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     subject_labels = df.groupby('ID')['label'].first().reset_index()
 
-    sss = StratifiedShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
-    train_idx, test_idx = next(sss.split(subject_labels['ID'], subject_labels['label']))
+    train_subjects, test_subjects = train_test_split(
+        subject_labels,
+        test_size=test_size,
+        stratify=subject_labels['label'],
+        random_state=random_state,
+    )
 
-    train_ids = set(subject_labels.iloc[train_idx]['ID'])
-    test_ids = set(subject_labels.iloc[test_idx]['ID'])
+    train_ids = set(train_subjects['ID'])
+    test_ids = set(test_subjects['ID'])
 
     train_df = df[df['ID'].isin(train_ids)].reset_index(drop=True)
     test_df = df[df['ID'].isin(test_ids)].reset_index(drop=True)
-
-    tr_labels = subject_labels[subject_labels['ID'].isin(train_ids)]['label']
-    te_labels = subject_labels[subject_labels['ID'].isin(test_ids)]['label']
-    print(f"train: {len(train_ids)} subjects ({tr_labels.sum()} ADHD, {(~tr_labels.astype(bool)).sum()} Control)")
-    print(f"test:  {len(test_ids)} subjects ({te_labels.sum()} ADHD, {(~te_labels.astype(bool)).sum()} Control)")
 
     return train_df, test_df
 
@@ -86,5 +81,4 @@ def get_subject_windows(
     y = np.array(y_list)
     groups = np.array(groups_list)
 
-    print(f"created {len(X)} windows of size {window_size} with step {step}")
     return X, y, groups

@@ -145,6 +145,7 @@ def train_cnn(
     lr: float = 1e-3,
     epochs: int = 50,
     batch_size: int = 64,
+    patience: int = 10,
     seed: int | None = None,
     device: str | None = None,
 ) -> tuple[EEGConvNet, list[dict]]:
@@ -169,6 +170,9 @@ def train_cnn(
     criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(pos_weight, dtype=torch.float32).to(device))
 
     history = []
+    best_val_loss = float('inf')
+    best_state: dict | None = None
+    patience_counter = 0
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -195,5 +199,18 @@ def train_cnn(
 
         if epoch % 10 == 0:
             print(f"epoch {epoch:3d} | train_loss={train_loss:.4f} | val_loss={val_loss:.4f} | val_acc={val_acc:.4f}")
+
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
+            patience_counter = 0
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f"early stopping at epoch {epoch} (best val_loss={best_val_loss:.4f})")
+                break
+
+    if best_state is not None:
+        model.load_state_dict({k: v.to(device) for k, v in best_state.items()})
 
     return model, history
