@@ -46,7 +46,6 @@ def train_baselines(
         y_proba = model.predict_proba(X_test)[:, 1] if hasattr(model, 'predict_proba') else None
 
         results[name] = {'model': model, 'y_pred': y_pred, 'y_proba': y_proba}
-        print(f"trained: {name}")
 
     return results
 
