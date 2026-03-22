@@ -29,10 +29,10 @@ Download `adhdata.csv` from Kaggle and put it at `adhd_classifier/data/adhdata.c
 
 | model             | accuracy      | f1            | roc auc       |
 | ----------------- | ------------- | ------------- | ------------- |
-| SVM (RBF)         | 0.800 ± 0.056 | 0.800 ± 0.067 | 0.871 ± 0.054 |
-| Random Forest     | 0.825 ± 0.062 | 0.822 ± 0.072 | 0.893 ± 0.041 |
-| Gradient Boosting | 0.811 ± 0.066 | 0.808 ± 0.073 | 0.879 ± 0.047 |
-| LDA               | 0.759 ± 0.047 | 0.753 ± 0.060 | 0.830 ± 0.053 |
+| SVM (RBF)         | 0.800 ± 0.056 | 0.811 ± 0.075 | 0.884 ± 0.070 |
+| Random Forest     | 0.825 ± 0.062 | 0.830 ± 0.076 | 0.910 ± 0.055 |
+| Gradient Boosting | 0.811 ± 0.066 | 0.822 ± 0.077 | 0.890 ± 0.066 |
+| LDA               | 0.759 ± 0.047 | 0.782 ± 0.068 | 0.802 ± 0.048 |
 
 Hold-out test set (25 subjects, subject-level aggregate, seed=42):
 
@@ -45,8 +45,8 @@ Hold-out test set (25 subjects, subject-level aggregate, seed=42):
 | MLP small (128→64, d=0.3, early stop)      | 0.72     | 0.741     | 0.769     |
 | MLP medium (256→128→64, d=0.3, early stop) | 0.72     | 0.741     | 0.731     |
 | MLP medium (256→128→64, d=0.5, early stop) | 0.72     | 0.720     | 0.750     |
-| **CNN (dropout=0.3, seed=42)**             | **0.80** | **0.783** | **0.885** |
-| CNN (dropout=0.5, seed=42)                 | 0.52     | 0.143     | 0.878     |
+| CNN (dropout=0.3, seed=42)                 | 0.76     | 0.727     | 0.885     |
+| **CNN (dropout=0.5, seed=42)**             | **0.80** | **0.783** | **0.872** |
 
 ## Features
 
