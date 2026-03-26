@@ -13,7 +13,7 @@ venv\Scripts\activate        # windows
 pip install -r requirements.txt
 ```
 
-Pobierz `adhdata.csv` z Kaggle i wrzuć do `adhd_classifier/data/`.
+Pobierz `adhdata.csv` z Kaggle i wrzuć do `data/`.
 
 ## Notebooki
 
