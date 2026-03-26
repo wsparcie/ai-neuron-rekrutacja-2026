@@ -56,6 +56,7 @@ def train_nn(
 
     model = ADHDNet(X_train.shape[1], hidden_dims=hidden_dims, dropout=dropout).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
 
     pos_weight = (y_train == 0).sum() / (y_train == 1).sum()
     criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(pos_weight, dtype=torch.float32).to(device))
@@ -86,10 +87,11 @@ def train_nn(
             preds = (torch.sigmoid(logits) > 0.5).cpu().numpy().astype(int)
             val_acc = (preds == y_val).mean()
 
+        scheduler.step(val_loss)
         history.append({'epoch': epoch, 'train_loss': train_loss, 'val_loss': val_loss, 'val_acc': val_acc})
 
         if epoch % 10 == 0:
-            print(f"epoch {epoch:3d} | train_loss={train_loss:.4f} | val_loss={val_loss:.4f} | val_acc={val_acc:.4f}")
+            print(f"epoch {epoch:3d} | train_loss={train_loss:.4f} | val_loss={val_loss:.4f} | val_acc={val_acc:.4f} | lr={optimizer.param_groups[0]['lr']:.2e}")
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
@@ -165,6 +167,7 @@ def train_cnn(
 
     model = EEGConvNet(n_channels=n_channels, dropout=dropout).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
 
     pos_weight = (y_train == 0).sum() / (y_train == 1).sum()
     criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(pos_weight, dtype=torch.float32).to(device))
@@ -195,10 +198,11 @@ def train_cnn(
             preds = (torch.sigmoid(logits) > 0.5).cpu().numpy().astype(int)
             val_acc = (preds == y_val).mean()
 
+        scheduler.step(val_loss)
         history.append({'epoch': epoch, 'train_loss': train_loss, 'val_loss': val_loss, 'val_acc': val_acc})
 
         if epoch % 10 == 0:
-            print(f"epoch {epoch:3d} | train_loss={train_loss:.4f} | val_loss={val_loss:.4f} | val_acc={val_acc:.4f}")
+            print(f"epoch {epoch:3d} | train_loss={train_loss:.4f} | val_loss={val_loss:.4f} | val_acc={val_acc:.4f} | lr={optimizer.param_groups[0]['lr']:.2e}")
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
