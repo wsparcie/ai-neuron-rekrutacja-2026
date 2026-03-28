@@ -46,32 +46,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Dane
-
-Pobierz `adhdata.csv` z [Kaggle](https://www.kaggle.com/datasets/danizo/eeg-dataset-for-adhd/data) i umieść w:
-
-```
-data/adhdata.csv
-```
-
-### 3. Odtworzenie eksperymentu
-
-```bash
-python run.py
-```
-
-### 4. Notebooki
-
-```bash
-jupyter notebooks/
-```
-
-| Notebook            | Zawartość                                                                                                               |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `eda.ipynb`         | Analiza eksploracyjna: surowy sygnał, PSD, rozkłady klas, TAR, koherencja, topograficzne mapy mocy pasm                 |
-| `experiments.ipynb` | Pełny pipeline: ekstrakcja cech, ważność cech (RF probe), 5-fold GroupKFold CV, modele bazowe, MLP, CNN, porównanie ROC |
-
----
+Pobierz `adhdata.csv` z Kaggle i wrzuć do `data/`.
 
 ## Metodologia
 
