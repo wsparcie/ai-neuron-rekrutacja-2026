@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.signal import welch, coherence
 from scipy.stats import skew, kurtosis
 
-from .data_loader import EEG_CHANNELS, SAMPLING_FREQ
+from data_loader import EEG_CHANNELS, SAMPLING_FREQ
 
 try:
     _trapz = np.trapezoid
@@ -149,7 +149,7 @@ def extract_subject_features(
     window_size: int = 256,
     step: int = 128,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    from .data_loader import get_subject_windows
+    from data_loader import get_subject_windows
 
     X_windows, y, groups = get_subject_windows(df, window_size=window_size, step=step)
     X = extract_window_features(X_windows)

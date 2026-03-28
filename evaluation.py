@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import (
@@ -37,7 +39,9 @@ def plot_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray, title: str = '
     if title:
         ax.set_title(title)
     plt.tight_layout()
-    plt.show()
+    fname = f"confusion_matrix{'_' + title.replace(' ', '_') if title else ''}.png"
+    plt.savefig(fname, dpi=120, bbox_inches='tight')
+    plt.close()
 
 
 def plot_roc_curve(y_true: np.ndarray, y_proba: np.ndarray, label: str = '') -> None:
@@ -51,7 +55,9 @@ def plot_roc_curve(y_true: np.ndarray, y_proba: np.ndarray, label: str = '') -> 
     plt.title('ROC Curve')
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    fname = f"roc_curve{'_' + label.replace(' ', '_') if label else ''}.png"
+    plt.savefig(fname, dpi=120, bbox_inches='tight')
+    plt.close()
 
 
 def aggregate_by_subject(
@@ -91,4 +97,6 @@ def compare_models(results: dict[str, dict]) -> None:
     plt.ylabel('Score')
     plt.xticks(rotation=30, ha='right')
     plt.tight_layout()
-    plt.show()
+    plt.savefig('model_comparison.png', dpi=120, bbox_inches='tight')
+    plt.close()
+    print("chart saved → model_comparison.png")

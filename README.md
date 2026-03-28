@@ -60,6 +60,25 @@ data/adhdata.csv
 python run.py
 ```
 
+## Pipeline
+
+```mermaid
+graph TD
+    A[Raw EEG Data<br/>adhdata.csv<br/>121 subjects · 19 ch · 128 Hz] --> B[Data Loader<br/>data_loader.py]
+    B --> C[Subject Split<br/>80/20 stratified]
+    C --> D[Preprocessing<br/>preprocessing.py]
+    D --> E[Feature Extraction<br/>feature_extraction.py]
+    D --> F[Raw Windows<br/>19 ch × 256 samples]
+    E --> G[Baseline Models<br/>baseline.py]
+    E --> H[MLP ADHDNet<br/>neural_net.py]
+    F --> I[1D-CNN EEGConvNet<br/>neural_net.py]
+    G --> J[Evaluation<br/>evaluation.py]
+    H --> J
+    I --> J
+    J --> K[Subject-level Aggregation<br/>majority vote / prob averaging]
+    K --> L[Final Metrics<br/>Accuracy · F1 · ROC-AUC]
+```
+
 ### 4. Notebooki
 
 ```bash
@@ -94,6 +113,16 @@ jupyter notebooks/
 3. `drop_missing()`: usunięcie wierszy z NaN.
 4. `clip_artefacts()`: obcięcie amplitud > mediana ± 5×MAD (liczone tylko na train). Artefakty ruchowe zostają przycięte bez jakiegokolwiek filtrowania sygnału.
 
+```mermaid
+graph TD
+    A[Raw CSV<br/>121 subjects · 19 channels · 128 Hz] --> B[load_data<br/>validate columns & labels]
+    B --> C[subject_split<br/>80/20 stratified by class]
+    C --> D[drop_missing<br/>remove NaN rows]
+    D --> E[clip_artefacts<br/>median ± 5×MAD — train stats only]
+    E --> F[get_subject_windows<br/>256 samples · 50% overlap]
+    F --> G[Clean Windows<br/>ready for feature extraction & CNN]
+```
+
 ### Ekstrakcja cech
 
 Sygnał dzielony na okna 256 próbek (2 s), krok 128 (50% overlap).
@@ -116,6 +145,37 @@ Sygnał dzielony na okna 256 próbek (2 s), krok 128 (50% overlap).
 
 Cechy oparte na PSD (band power, TAR, TBR, SEF95) liczone metodą Welcha (`scipy.signal.welch`, nperseg=256).
 
+```mermaid
+graph LR
+    A[Clean Windows<br/>256 samples @ 128 Hz] --> B[Time Domain]
+    A --> C[Frequency Domain<br/>Welch PSD]
+    A --> D[Hjorth Parameters]
+    A --> E[Connectivity]
+
+    B --> F[Mean · Std · Skew<br/>Kurtosis]
+    B --> G[Zero-Crossing Rate<br/>Peak-to-Peak]
+
+    C --> H[Band Powers δ θ α β γ<br/>Absolute + Relative]
+    C --> I[TAR · TBR · SWDR<br/>SEF95]
+    C --> J[Spectral Entropy]
+
+    D --> K[Activity<br/>Mobility · Complexity]
+
+    E --> L[Frontal-Parietal<br/>Coherence θ]
+    E --> M[Interhemispheric<br/>Coherence 8 pairs]
+    E --> N[Alpha Asymmetry<br/>F4/F3 · F8/F7]
+
+    F --> O[Feature Vector<br/>~350+ features per window]
+    G --> O
+    H --> O
+    I --> O
+    J --> O
+    K --> O
+    L --> O
+    M --> O
+    N --> O
+```
+
 ### Modele
 
 | Model                   | Wejście                     | Biblioteka | Szczegóły                                                                               |
@@ -132,6 +192,27 @@ Wszystkie modele PyTorch trenowane są z:
 - ważoną funkcją straty `BCEWithLogitsLoss(pos_weight=n_neg/n_pos)`,
 - optymalizatorem Adam z `weight_decay=1e-4`,
 - early stopping na zbiorze walidacyjnym (wewnętrzny subject split 80/20 ze zbioru treningowego).
+
+```mermaid
+graph TD
+    A[Feature Vector<br/>~350 features] --> B[SVM RBF<br/>C=1.0]
+    A --> C[Random Forest<br/>200 trees]
+    A --> D[Gradient Boosting<br/>100 trees · lr=0.1]
+    A --> E[LDA<br/>linear baseline]
+    A --> F[MLP ADHDNet<br/>FC + BN + ReLU + Dropout]
+    G[Raw Windows<br/>channels × 256 samples] --> H[1D-CNN EEGConvNet<br/>Conv1d 32→64→128]
+
+    B --> I[5-fold GroupKFold CV<br/>group = subject ID]
+    C --> I
+    D --> I
+    E --> I
+    F --> I
+    H --> I
+
+    I --> J[Hold-out Evaluation<br/>25 subjects]
+    J --> K[Subject-level Aggregation<br/>majority vote + prob averaging]
+    K --> L[Accuracy · F1 · ROC-AUC]
+```
 
 ### Ewaluacja
 
